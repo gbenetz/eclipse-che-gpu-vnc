@@ -73,6 +73,25 @@ RUN for f in "/home/user" "/etc/passwd" "/etc/group" "/projects"; do\
         sed s#root:x:0:#root:x:0:0,\${USER_ID}:#g \
         > /home/user/group.template && \
         sudo sed -ri 's/StrictModes yes/StrictModes no/g' /etc/ssh/sshd_config
+
+# Installing and enabling VNC in image
+RUN sudo apt-get update && \
+    sudo apt-get install -y --no-install-recommends supervisor x11vnc xvfb net-tools blackbox rxvt-unicode xfonts-terminus libxi6 libgconf-2-4
+
+# download and install noVNC
+
+RUN sudo mkdir -p /opt/noVNC/utils/websockify && \
+    wget -qO- "http://github.com/kanaka/noVNC/tarball/master" | sudo tar -zx --strip-components=1 -C /opt/noVNC && \
+    wget -qO- "https://github.com/kanaka/websockify/tarball/master" | sudo tar -zx --strip-components=1 -C /opt/noVNC/utils/websockify
+
+ADD index.html /opt/noVNC/
+
+RUN sudo mkdir -p /etc/X11/blackbox && \
+    echo "[begin] (Blackbox) \n [exec] (Terminal)     {urxvt -fn "xft:Terminus:size=12"} \n [end]" | sudo tee -a /etc/X11/blackbox/blackbox-menu
+
+ADD supervisord.conf /opt/
+EXPOSE 6080
+
 COPY ["entrypoint.sh","/home/user/entrypoint.sh"]
 RUN sudo chmod a+x /home/user/entrypoint.sh
 ENTRYPOINT ["/home/user/entrypoint.sh"]
