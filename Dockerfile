@@ -94,5 +94,8 @@ EXPOSE 6080
 
 COPY ["entrypoint.sh","/home/user/entrypoint.sh"]
 RUN sudo chmod a+x /home/user/entrypoint.sh
-ENTRYPOINT ["/home/user/entrypoint.sh"]
-CMD tail -f /dev/null
+# ENTRYPOINT ["/home/user/entrypoint.sh"]
+# CMD tail -f /dev/null
+
+# Using supervisord as in x11_vnc
+CMD /usr/bin/supervisord -c /opt/supervisord.conf && tail -f /dev/null
